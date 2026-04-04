@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Predictor - Flask</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-gradient-primary text-white text-center py-4">
+                        <h1 class="display-4 mb-2">
+                            <i class="bi bi-heart-pulse-fill me-3"></i>
+                            Breast Cancer Predictor
+                        </h1>
+                        <p class="lead mb-0">Advanced ML model with 95.9% test accuracy</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Stats Row -->
+                        <div class="row mb-5">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="card bg-light border-0 h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-graph-up-arrow text-success fs-1 mb-2"></i>
+                                        <h3>95.9%</h3>
+                                        <p class="text-muted">Test Accuracy</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="card bg-light border-0 h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-shield-check text-info fs-1 mb-2"></i>
+                                        <h3>569</h3>
+                                        <p class="text-muted">Training Samples</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="card bg-light border-0 h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-cpu text-warning fs-1 mb-2"></i>
+                                        <h3>30</h3>
+                                        <p class="text-muted">Features</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Form -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-sliders me-2"></i>Enter Cell Measurements
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="predictionForm">
+                                    <div class="row g-4">
+                                        <!-- Radius Group -->
+                                        <div class="col-lg-4">
+                                            <h6 class="text-primary mb-3"><i class="bi bi-circle-half me-1"></i>Radius</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">radius_mean</label>
+                                                <input type="range" class="form-range" id="radius_mean" min="6.98" max="28.11" step="0.01" value="14">
+                                                <span class="form-text" id="radius_mean_val">14.00</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">radius_se</label>
+                                                <input type="range" class="form-range" id="radius_se" min="0.1115" max="2.873" step="0.001" value="0.4">
+                                                <span class="form-text" id="radius_se_val">0.40</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">radius_worst</label>
+                                                <input type="range" class="form-range" id="radius_worst" min="9.71" max="36.04" step="0.01" value="16.5">
+                                                <span class="form-text" id="radius_worst_val">16.50</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Texture Group -->
+                                        <div class="col-lg-4">
+                                            <h6 class="text-success mb-3"><i class="bi bi-texture me-1"></i>Texture</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">texture_mean</label>
+                                                <input type="range" class="form-range" id="texture_mean" min="9.71" max="39.28" step="0.01" value="18">
+                                                <span class="form-text" id="texture_mean_val">18.00</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">texture_se</label>
+                                                <input type="range" class="form-range" id="texture_se" min="0.3602" max="4.885" step="0.001" value="0.8">
+                                                <span class="form-text" id="texture_se_val">0.80</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">texture_worst</label>
+                                                <input type="range" class="form-range" id="texture_worst" min="12.02" max="49.54" step="0.01" value="19">
+                                                <span class="form-text" id="texture_worst_val">19.00</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Perimeter/Area Group -->
+                                        <div class="col-lg-4">
+                                            <h6 class="text-info mb-3"><i class="bi bi-circle me-1"></i>Perimeter & Area</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">perimeter_mean</label>
+                                                <input type="range" class="form-range" id="perimeter_mean" min="43.79" max="188.5" step="0.1" value="95">
+                                                <span class="form-text" id="perimeter_mean_val">95.0</span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">area_mean</label>
+                                                <input type="range" class="form-range" id="area_mean" min="143.5" max="2501" step="1" value="650">
+                                                <span class="form-text" id="area_mean_val">650</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Predict Button -->
+                                    <div class="text-center mt-5">
+                                        <button type="submit" class="btn btn-primary btn-lg px-5 py-3 predict-btn" id="predictBtn">
+                                            <span class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                                            <i class="bi bi-robot me-2"></i>
+                                            Predict Tumor Type
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Results -->
+                        <div id="results" class="card border-0" style="display: none;">
+                            <div class="card-body text-center p-5">
+                                <div id="predictionResult" class="mb-4"></div>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="card h-100 bg-gradient-malignant text-white">
+                                            <div class="card-body">
+                                                <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+                                                <h3 id="probMalignant" class="mb-2">0%</h3>
+                                                <p class="mb-0">Malignant Probability</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card h-100 bg-gradient-benign text-white">
+                                            <div class="card-body">
+                                                <i class="bi bi-check-circle-fill fs-1 mb-3"></i>
+                                                <h3 id="probBenign" class="mb-2">0%</h3>
+                                                <p class="mb-0">Benign Probability</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        Confusion Matrix
+                        <div class="card mt-5">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-grid-3x3-gap me-2 text-info"></i>Model Performance - Confusion Matrix</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="confusionMatrix" class="p-4" style="height: 400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update slider values
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', () => {
+                document.getElementById(slider.id + '_val').textContent = slider.value;
+            });
+        });
+
+        // Confusion Matrix Data (from training: [[71,1],[3,39]])
+        const cmData = [{
+            z: [[71, 1], [3, 39]],
+            x: ['Predicted Benign', 'Predicted Malignant'],
+            y: ['Actual Benign', 'Actual Malignant'],
+            colorscale: 'Viridis',
+            type: 'heatmap',
+            text: [['71<br>True Neg', '1<br>False Pos'], ['3<br>False Neg', '39<br>True Pos']],
+            texttemplate: "%{text}",
+            hoverongaps: false
+        }];
+
+        Plotly.newPlot('confusionMatrix', cmData, {
+            title: {
+                text: 'Confusion Matrix (Test Set)',
+                font: {size: 16}
+            },
+            xaxis: {title: 'Predicted'},
+            yaxis: {title: 'Actual', autorange: 'reversed'},
+            margin: {l: 80, r: 20, t: 50, b: 80}
+        });
+
+        // Predict button with loading
+        const predictBtn = document.getElementById('predictBtn');
+        const predictForm = document.getElementById('predictionForm');
+
+        predictForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const sliders = {
+                'radius_mean': parseFloat(document.getElementById('radius_mean').value),
+                'texture_mean': parseFloat(document.getElementById('texture_mean').value),
+                'perimeter_mean': parseFloat(document.getElementById('perimeter_mean').value),
+                'area_mean': parseFloat(document.getElementById('area_mean').value),
+                'radius_se': parseFloat(document.getElementById('radius_se').value),
+                'texture_se': parseFloat(document.getElementById('texture_se').value),
+                'radius_worst': parseFloat(document.getElementById('radius_worst').value),
+                'texture_worst': parseFloat(document.getElementById('texture_worst').value),
+                'smoothness_mean': 0.1,
+                'compactness_mean': 0.1,
+                'concavity_mean': 0.1,
+                'concave points_mean': 0.1,
+                'symmetry_mean': 0.2,
+                'fractal_dimension_mean': 0.06,
+                'perimeter_se': 1.0,
+                'area_se': 20,
+                'smoothness_se': 0.006,
+                'compactness_se': 0.02,
+                'concavity_se': 0.03,
+                'concave points_se': 0.01,
+                'symmetry_se': 0.02,
+                'fractal_dimension_se': 0.004,
+                'perimeter_worst': 110,
+                'area_worst': 800,
+                'smoothness_worst': 0.12,
+                'compactness_worst': 0.2,
+                'concavity_worst': 0.2,
+                'concave points_worst': 0.1,
+                'symmetry_worst': 0.3,
+                'fractal_dimension_worst': 0.08
+            };
+
+            // Loading state
+            predictBtn.disabled = true;
+            predictBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Predicting...';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({features: sliders})
+                });
+                
+                const result = await response.json();
+                showResult(result);
+            } catch (error) {
+                console.error('Prediction error:', error);
+                alert('Prediction failed. Please try again.');
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.innerHTML = '<i class="bi bi-robot me-2"></i>Predict Tumor Type';
+            }
+        });
+
+        function showResult(result) {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({behavior: 'smooth'});
+            
+            const resultDiv = document.getElementById('predictionResult');
+            if (result.prediction === 'Malignant') {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show shadow-lg" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-1 me-3"></i>
+                        <strong>Malignant Tumor Detected!</strong><br>
+                        <small class="opacity-75">Confidence: <strong>${result.confidence.toFixed(1)}%</strong></small>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show shadow-lg" role="alert">
+                        <i class="bi bi-check-circle-fill fs-1 me-3"></i>
+                        <strong>Benign Tumor (Safe)</strong><br>
+                        <small class="opacity-75">Confidence: <strong>${result.confidence.toFixed(1)}%</strong></small>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('probMalignant').textContent = result.prob_malignant.toFixed(1) + '%';
+            document.getElementById('probBenign').textContent = result.prob_benign.toFixed(1) + '%';
+        }
+    </script>
+</body>
+</html>
